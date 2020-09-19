@@ -124,7 +124,7 @@ class Databases{
                 break;
             case 'import':
                 header('Content-Type:text/html;charset=UTF-8');
-                $filelist = dir_list($this->datadir);
+                $filelist = $this->dir_list($this->datadir);
                 foreach ((array)$filelist as $r){
                     $file = explode('-',basename($r));
                     if($file[0] == $filename){
@@ -276,6 +276,51 @@ class Databases{
             $num++;
         }
         return $ret;
+    }
+	
+	/**
+     * [检查文件或者目录]
+     * @param  [type] $path [文件路径]
+     * @param  string $exts [类型]
+     * @param  array  $list [返回数组]
+     * @return [type]
+     */
+    public function dir_list($path, $exts = '', $d = '', $list= array()) {
+        $path = $this->dir_path($path);
+        $files = glob($path.'*');
+        foreach($files as $v) {
+            $fileext = $this->fileext($v);
+            if (!$exts || preg_match("/\.($exts)/i", $v)) {
+                $list[] = $v;
+                if (is_dir($v)) {
+                    $list = $this->dir_list($v, $exts, $list);
+                    if($d && count(scandir($v)) == 2){
+                        @rmdir($v);
+                    }
+                }
+            }
+        }
+        return $list;
+    }
+
+    /**
+     * [检查目录是否合法]
+     * @param  [type] $path [目录路径]
+     * @return [type]
+     */
+    protected function dir_path($path) {
+        $path = str_replace('\\', '/', $path);
+        if(substr($path, -1) != '/') $path = $path.'/';
+        return $path;
+    }
+
+    /**
+     * [检查文件名称]
+     * @param  [type] $filename [文件名称]
+     * @return [type]
+     */
+    protected function fileext($filename) {
+        return strtolower(trim(substr(strrchr($filename, '.'), 1, 10)));
     }
 
 

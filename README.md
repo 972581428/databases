@@ -63,7 +63,7 @@ public function recover(){
 		    $this->success($result['msg']);
 		}
 		//列出备份文件
-		$filelist = dir_list($this->datadir);
+		$filelist = $this->db_model->dir_list($this->datadir);
 		$files = [];
         foreach ((array)$filelist as $r) {
             $filename = explode('-', basename($r));
@@ -74,51 +74,3 @@ public function recover(){
 		return $this->fetch();
 	}
 ~~~
-下面示例文件函数
-~~~php
-/**
- * [检查文件或者目录]
- * @param  [type] $path [文件路径]
- * @param  string $exts [类型]
- * @param  array  $list [返回数组]
- * @return [type]
- */
-function dir_list($path, $exts = '', $d = '', $list= array()) {
-    $path = dir_path($path);
-    $files = glob($path.'*');
-    foreach($files as $v) {
-        $fileext = fileext($v);
-        if (!$exts || preg_match("/\.($exts)/i", $v)) {
-            $list[] = $v;
-            if (is_dir($v)) {
-                $list = dir_list($v, $exts, $list);
-                if($d && count(scandir($v)) == 2){
-                    @rmdir($v);
-                }
-            }
-        }
-    }
-    return $list;
-}
-
-/**
- * [检查文件名称]
- * @param  [type] $filename [文件名称]
- * @return [type]
- */
-function fileext($filename) {
-    return strtolower(trim(substr(strrchr($filename, '.'), 1, 10)));
-}
-
-/**
- * [检查目录是否合法]
- * @param  [type] $path [目录路径]
- * @return [type]
- */
-function dir_path($path) {
-    $path = str_replace('\\', '/', $path);
-    if(substr($path, -1) != '/') $path = $path.'/';
-    return $path;
-}
-~~~
-
